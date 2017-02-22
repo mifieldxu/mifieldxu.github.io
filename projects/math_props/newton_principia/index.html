@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Proposition 1 of Newton's Principia</title>
+	<link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css">
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script type="text/javascript" src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="jxgbox" class="jxgbox"></div>
+		<div id="control_wrapper">
+			<label id="number_label">Number of points: 
+				<output name="number_display" id="number_display">7</output>
+				<input type="range" name="number_slider" id="number_slider" min="3" max="49" value="7">
+			</label>
+			<br>
+			<label id="force_law_label">Force law: 
+				<select id="force_law_option">
+					<option value="simple_harmonic_motion">Simple harmonic motion</option>
+					<option value="inverse_square">Inverse square force law</option>
+					<option value="inverse_cube">Inverse cube force law</option>
+				</select>
+			</label>
+			<br>
+			<button name="reset_button" id="reset_button">Reset in case of wonky diagram</button>
+		</div>
+	</div>
+	<script type="text/javascript" src="script.js" charset="utf-8"></script>
+</body>
+</html>
