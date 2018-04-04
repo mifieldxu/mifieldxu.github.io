@@ -1,0 +1,18 @@
+body{
+	margin: 0;
+}
+.loading{
+	cursor: wait !important;
+}
+#wrapper{
+	width: 800px;
+	margin: 0 auto;
+}
+
+#pie-chart{
+	position: relative;
+}
+
+.survivability{
+	text-align: right;
+}

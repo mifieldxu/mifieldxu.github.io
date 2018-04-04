@@ -1,0 +1,39 @@
+<!-- This webpage and its associated files are covered under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU General Public License, which permits the freedom to run, study, share and modify the software. -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Population simulation tool</title>
+	<!-- <link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css"> -->
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<!-- <script type="text/javascript" src="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script> -->
+	<script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+	<script src="http://www.chartjs.org/samples/latest/utils.js"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<form id="form">
+			<label># of generations to simulate: <input type="number" class="generation-count" id="generation-count" required title="# of generations to simulate" placeholder="# of generations to simulate" value="150" min="1" max="1500" step="1"></label>
+			<label>average # of offspring for each pair: <input type="number" class="offspring-average" id="offspring-average" required title="average # of offspring for each pair" placeholder="average # of offspring for each pair" value="1" min="1" max="100" step="1"></label>
+			<label>allow self-crossing: <input type="checkbox" class="self-crossing" id="self-crossing" title="allow self-crossing" checked></label>
+
+			<br>
+
+			<label>AABB initial population: <input type="number" class="population" id="AABB-initial-population" required title="AABB initial population" placeholder="AABB initial population" value="000" min="0" max="10000" step="10"></label> <label>AABB survivability percentage: <input type="number" class="survivability" id="AABB-survivability" required title="AABB survivability percentage" placeholder="AABB survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
+			<label>AABb initial population: <input type="number" class="population" id="AABb-initial-population" required title="AABb initial population" placeholder="AABb initial population" value="2000" min="0" max="10000" step="10"></label> <label>AABb survivability percentage: <input type="number" class="survivability" id="AABb-survivability" required title="AABb survivability percentage" placeholder="AABb survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
+			<label>AAbb initial population: <input type="number" class="population" id="AAbb-initial-population" required title="AAbb initial population" placeholder="AAbb initial population" value="1000" min="0" max="10000" step="10"></label> <label>AAbb survivability percentage: <input type="number" class="survivability" id="AAbb-survivability" required title="AAbb survivability percentage" placeholder="AAbb survivability percentage" value="98" min="0" max="100" step="0.1">%</label> <br>
+			<label>AaBB initial population: <input type="number" class="population" id="AaBB-initial-population" required title="AaBB initial population" placeholder="AaBB initial population" value="2000" min="0" max="10000" step="10"></label> <label>AaBB survivability percentage: <input type="number" class="survivability" id="AaBB-survivability" required title="AaBB survivability percentage" placeholder="AaBB survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
+			<label>AaBb initial population: <input type="number" class="population" id="AaBb-initial-population" required title="AaBb initial population" placeholder="AaBb initial population" value="3000" min="0" max="10000" step="10"></label> <label>AaBb survivability percentage: <input type="number" class="survivability" id="AaBb-survivability" required title="AaBb survivability percentage" placeholder="AaBb survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
+			<label>Aabb initial population: <input type="number" class="population" id="Aabb-initial-population" required title="Aabb initial population" placeholder="Aabb initial population" value="1000" min="0" max="10000" step="10"></label> <label>Aabb survivability percentage: <input type="number" class="survivability" id="Aabb-survivability" required title="Aabb survivability percentage" placeholder="Aabb survivability percentage" value="98" min="0" max="100" step="0.1">%</label> <br>
+			<label>aaBB initial population: <input type="number" class="population" id="aaBB-initial-population" required title="aaBB initial population" placeholder="aaBB initial population" value="1000" min="0" max="10000" step="10"></label> <label>aaBB survivability percentage: <input type="number" class="survivability" id="aaBB-survivability" required title="aaBB survivability percentage" placeholder="aaBB survivability percentage" value="94" min="0" max="100" step="0.1">%</label> <br>
+			<label>aaBb initial population: <input type="number" class="population" id="aaBb-initial-population" required title="aaBb initial population" placeholder="aaBb initial population" value="1000" min="0" max="10000" step="10"></label> <label>aaBb survivability percentage: <input type="number" class="survivability" id="aaBb-survivability" required title="aaBb survivability percentage" placeholder="aaBb survivability percentage" value="94" min="0" max="100" step="0.1">%</label> <br>
+			<label>aabb initial population: <input type="number" class="population" id="aabb-initial-population" required title="aabb initial population" placeholder="aabb initial population" value="500" min="0" max="10000" step="10"></label> <label>aabb survivability percentage: <input type="number" class="survivability" id="aabb-survivability" required title="aabb survivability percentage" placeholder="aabb survivability percentage" value="100" min="0" max="100" step="0.1">%</label> <br>
+
+			<input type="submit" class="submit" id="submit" title="run the thing" value="run">
+		</form>
+		<canvas id="pie-chart"></canvas>
+		<canvas id="area-chart"></canvas>
+	</div>
+	<script type="text/javascript" src="script.js" charset="utf-8"></script>
+</body>
+</html>
