@@ -1,87 +1,141 @@
 'use strict';
-//
-(function make_stuff(){
-
-//input management
+// TO DO:
+// deal with onpopstate and the event.state object and use pushState() instead of replaceState()
 window.onload = function(){
 	var _0 = bigInt('0'),
 		_1 = bigInt('1'),
 		_2 = bigInt('2'),
 		_4 = bigInt('4'),
-		_8 = bigInt('8'),
-		_16 = bigInt('16'),
 		generation_count,
 		offspring_ave,
 		sc, //self crossing
+		survival_correlation,
+		population_correlation,
 		generation,
 		popln_ctrl = true,
 		popln_ctrl_limit = bigInt('1000000000000000000000'),
-		percentage_decimal = 4,
-		percentage_scaling = bigInt(Math.pow(10, 2 + percentage_decimal));
+		percentage_decimal = 6,
+		percentage_scaling = bigInt(Math.pow(10, 2 + percentage_decimal)),
+		genotypes = ['AABB', 'AABb', 'AAbb', 'AaBB', 'AaBb', 'Aabb', 'aaBB', 'aaBb', 'aabb'],
+		colors = ['#800080', '#ae105e', '#dc143c', '#6135b1', '#aa4aaa', '#d87488', '#4169e1', '#8a96ea', '#d3d3d3'],
+		prefixes = {
+			init_pop: "p_",
+			srvl_rate: "s_",
+		},
+		results = {
+			AA: {
+				AA: {
+					AA: _1,
+					Aa: 0,
+					aa: 0,
+				},
+				Aa: {
+					AA: _2,
+					Aa: _2,
+					aa: 0,
+				},
+				aa: {
+					AA: 0,
+					Aa: _1,
+					aa: 0,
+				},
+			},
+			Aa: {
+				AA: {
+					AA: _2,
+					Aa: _2,
+					aa: 0,
+				},
+				Aa: {
+					AA: _4,
+					Aa: _2,
+					aa: _4,
+				},
+				aa: {
+					AA: 0,
+					Aa: _2,
+					aa: _2,
+				},
+			},
+			aa: {
+				AA: {
+					AA: 0,
+					Aa: _1,
+					aa: 0,
+				},
+				Aa: {
+					AA: 0,
+					Aa: _2,
+					aa: _2,
+				},
+				aa: {
+					AA: 0,
+					Aa: 0,
+					aa: _1,
+				},
+			},
+			BB: {
+				BB: {
+					BB: _1,
+					Bb: 0,
+					bb: 0,
+				},
+				Bb: {
+					BB: _2,
+					Bb: _2,
+					bb: 0,
+				},
+				bb: {
+					BB: 0,
+					Bb: _1,
+					bb: 0,
+				},
+			},
+			Bb: {
+				BB: {
+					BB: _2,
+					Bb: _2,
+					bb: 0,
+				},
+				Bb: {
+					BB: _4,
+					Bb: _2,
+					bb: _4,
+				},
+				bb: {
+					BB: 0,
+					Bb: _2,
+					bb: _2,
+				},
+			},
+			bb: {
+				BB: {
+					BB: 0,
+					Bb: _1,
+					bb: 0,
+				},
+				Bb: {
+					BB: 0,
+					Bb: _2,
+					bb: _2,
+				},
+				bb: {
+					BB: 0,
+					Bb: 0,
+					bb: _1,
+				},
+			},
+		};
 
-	var area_chart_element = document.getElementById("area-chart").getContext('2d'),
-		pie_chart_element = document.getElementById("pie-chart").getContext('2d');
+	var area_chart_element = document.getElementById("area_chart_canvas").getContext('2d'),
+		pie_chart_element = document.getElementById("pie_chart_canvas").getContext('2d');
 
 	var area_chart = new Chart(area_chart_element, {
 			type: 'line',
 			data: {
 				labels: [],
 				spanGaps: true,
-				datasets: [{
-					backgroundColor: Samples.utils.transparentize(window.chartColors.red),
-					borderColor: window.chartColors.red,
-					data: [],
-					label: 'AABB',
-					fill: 'origin',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.orange),
-					borderColor: window.chartColors.orange,
-					data: [],
-					label: 'AABb',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.yellow),
-					borderColor: window.chartColors.yellow,
-					data: [],
-					label: 'AAbb',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.green),
-					borderColor: window.chartColors.green,
-					data: [],
-					label: 'AaBB',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.blue),
-					borderColor: window.chartColors.blue,
-					data: [],
-					label: 'AaBb',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.grey),
-					borderColor: window.chartColors.grey,
-					data: [],
-					label: 'Aabb',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.purple),
-					borderColor: window.chartColors.purple,
-					data: [],
-					label: 'aaBB',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.red),
-					borderColor: window.chartColors.red,
-					data: [],
-					label: 'aaBb',
-					fill: '-1',
-				}, {
-					backgroundColor: Samples.utils.transparentize(window.chartColors.orange),
-					borderColor: window.chartColors.orange,
-					data: [],
-					label: 'aabb',
-					fill: '-1',
-				}],
+				datasets: [],
 			},
 			options: {
 				elements: {
@@ -105,6 +159,8 @@ window.onload = function(){
 					animationDuration: 0,
 				},
 				responsiveAnimationDuration: 0,
+				resposive: true,
+				maintainAspectRatio: false,
 				plugins: {
 					filler: {
 						propogate: false,
@@ -115,44 +171,31 @@ window.onload = function(){
 		pie_chart = new Chart(pie_chart_element, {
 			type: 'doughnut',
 			data: {
-				labels: [
-					"AABB",
-					"AABb",
-					"AAbb",
-					"AaBB",
-					"AaBb",
-					"Aabb",
-					"aaBB",
-					"aaBb",
-					"aabb",
-				],
+				labels: genotypes,
 				datasets: [{
 					data: [],
-					backgroundColor: [
-						window.chartColors.red,
-						window.chartColors.orange,
-						window.chartColors.yellow,
-						window.chartColors.green,
-						window.chartColors.blue,
-						window.chartColors.grey,
-						window.chartColors.purple,
-						window.chartColors.red,
-						window.chartColors.orange,
-					],
+					backgroundColor: colors,
 					label: '0',
 				}],
 			},
 			options: {
 				legend: {
-					position: 'right',
+					position: 'top',
 				},
 				animation: {
 					animateScale: false,
 					animateRotate: false,
-					duration: 500,
-				}
+					duration: 400,
+				},
+				resposive: true,
+				maintainAspectRatio: false,
 			},
 		});
+
+	function transparentize(color, opacity){
+		var alpha = opacity === undefined ? 0.5 : 1 - opacity;
+		return Color(color).alpha(alpha).rgbString();
+	}
 
 	function percentage(p, sum){
 		return p.times(percentage_scaling).over(sum).value / percentage_scaling;
@@ -165,32 +208,38 @@ window.onload = function(){
 	function population_ctrl(g){
 		var sum = population_sum(g);
 		if (popln_ctrl && sum.compare(popln_ctrl_limit)) {
-			g.AABB.p = g.AABB.p.times(popln_ctrl_limit).over(sum);
-			g.AABb.p = g.AABb.p.times(popln_ctrl_limit).over(sum);
-			g.AAbb.p = g.AAbb.p.times(popln_ctrl_limit).over(sum);
-			g.AaBB.p = g.AaBB.p.times(popln_ctrl_limit).over(sum);
-			g.AaBb.p = g.AaBb.p.times(popln_ctrl_limit).over(sum);
-			g.Aabb.p = g.Aabb.p.times(popln_ctrl_limit).over(sum);
-			g.aaBB.p = g.aaBB.p.times(popln_ctrl_limit).over(sum);
-			g.aaBb.p = g.aaBb.p.times(popln_ctrl_limit).over(sum);
-			g.aabb.p = g.aabb.p.times(popln_ctrl_limit).over(sum);
+			genotypes.forEach((genotype) => {
+				g[genotype].p = g[genotype].p.times(popln_ctrl_limit).over(sum);	
+			});
 		};
 		return g;
 	}
 
-	function free_cross(n, g){
-		var g_ = {
-				AABB: {p: bigInt('0'), s: g.AABB.s},
-				AABb: {p: bigInt('0'), s: g.AABb.s},
-				AAbb: {p: bigInt('0'), s: g.AAbb.s},
-				AaBB: {p: bigInt('0'), s: g.AaBB.s},
-				AaBb: {p: bigInt('0'), s: g.AaBb.s},
-				Aabb: {p: bigInt('0'), s: g.Aabb.s},
-				aaBB: {p: bigInt('0'), s: g.aaBB.s},
-				aaBb: {p: bigInt('0'), s: g.aaBb.s},
-				aabb: {p: bigInt('0'), s: g.aabb.s},
+	function cross(parent_1, parent_2, result, number_of_crossings){
+		var p_1 = {
+				a: parent_1.substring(0, 2),
+				b: parent_1.substring(2),
 			},
-			sum = population_sum(g);
+			p_2 = {
+				a: parent_2.substring(0, 2),
+				b: parent_2.substring(2),
+			},
+			r = {
+				a: result.substring(0, 2),
+				b: result.substring(2),
+			};
+		if (results[p_1.a][p_2.a][r.a] && results[p_1.b][p_2.b][r.b]) {
+			return number_of_crossings.over(results[p_1.a][p_2.a][r.a].times(results[p_1.b][p_2.b][r.b]));
+		} else {
+			return _0;
+		};
+	}
+
+	function free_crossing(n, g){
+		var g_ = {},
+			sum = population_sum(g),
+			crossings = [];
+		// pushing data in g
 		area_chart.data.labels.push(n.toString());
 		area_chart.data.datasets.forEach((dataset) => {
 			dataset.data.push(percentage(g[dataset.label].p, sum));
@@ -198,145 +247,82 @@ window.onload = function(){
 		if (n == generation_count) {
 			return g;
 		} else {
-			g_.AABB.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).over(_1)	.plus(g.AABB.p.times(g.AABb.p).over(_2))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).over(_2))			.plus(g.AABB.p.times(g.AaBb.p).over(_4))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).over(_4))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).over(_4))			.plus(g.AABb.p.times(g.AaBb.p).over(_8))			.plus(g.AABb.p.times(g.Aabb.p).times(_0))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).times(_0))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).over(_4))	.plus(g.AaBB.p.times(g.AaBb.p).over(_8))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).times(_0))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_16))	.plus(g.AaBb.p.times(g.Aabb.p).times(_0))			.plus(g.AaBb.p.times(g.aaBB.p).times(_0))			.plus(g.AaBb.p.times(g.aaBb.p).times(_0))			.plus(g.AaBb.p.times(g.aabb.p).times(_0))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).times(_0))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.AABB.s).over(percentage_scaling);
-			g_.AABb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).over(_2))			.plus(g.AABB.p.times(g.AAbb.p).over(_1))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).over(_4))			.plus(g.AABB.p.times(g.Aabb.p).over(_2))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).over(_2))	.plus(g.AABb.p.times(g.AAbb.p).over(_2))			.plus(g.AABb.p.times(g.AaBB.p).over(_4))			.plus(g.AABb.p.times(g.AaBb.p).over(_4))			.plus(g.AABb.p.times(g.Aabb.p).over(_4))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).over(_2))			.plus(g.AAbb.p.times(g.AaBb.p).over(_4))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).over(_8))			.plus(g.AaBB.p.times(g.Aabb.p).over(_4))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).times(_0))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_8))	.plus(g.AaBb.p.times(g.Aabb.p).over(_8))			.plus(g.AaBb.p.times(g.aaBB.p).times(_0))			.plus(g.AaBb.p.times(g.aaBb.p).times(_0))			.plus(g.AaBb.p.times(g.aabb.p).times(_0))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).times(_0))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.AABb.s).over(percentage_scaling);
-			g_.AAbb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).times(_0))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).over(_4))	.plus(g.AABb.p.times(g.AAbb.p).over(_2))			.plus(g.AABb.p.times(g.AaBB.p).times(_0))			.plus(g.AABb.p.times(g.AaBb.p).over(_8))			.plus(g.AABb.p.times(g.Aabb.p).over(_4))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).over(_1))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).over(_4))			.plus(g.AAbb.p.times(g.Aabb.p).over(_2))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).times(_0))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).times(_0))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_16))	.plus(g.AaBb.p.times(g.Aabb.p).over(_8))			.plus(g.AaBb.p.times(g.aaBB.p).times(_0))			.plus(g.AaBb.p.times(g.aaBb.p).times(_0))			.plus(g.AaBb.p.times(g.aabb.p).times(_0))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).over(_4))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).times(_0))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.AAbb.s).over(percentage_scaling);
-			g_.AaBB.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).over(_2))			.plus(g.AABB.p.times(g.AaBb.p).over(_4))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).over(_1))			.plus(g.AABB.p.times(g.aaBb.p).over(_2))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).over(_4))			.plus(g.AABb.p.times(g.AaBb.p).over(_8))			.plus(g.AABb.p.times(g.Aabb.p).times(_0))			.plus(g.AABb.p.times(g.aaBB.p).over(_2))			.plus(g.AABb.p.times(g.aaBb.p).over(_2))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).times(_0))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).over(_2))	.plus(g.AaBB.p.times(g.AaBb.p).over(_4))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).over(_2))			.plus(g.AaBB.p.times(g.aaBb.p).over(_4))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_8))	.plus(g.AaBb.p.times(g.Aabb.p).times(_0))			.plus(g.AaBb.p.times(g.aaBB.p).over(_4))			.plus(g.AaBb.p.times(g.aaBb.p).over(_4))			.plus(g.AaBb.p.times(g.aabb.p).times(_0))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).times(_0))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.AaBB.s).over(percentage_scaling);
-			g_.AaBb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).over(_4))			.plus(g.AABB.p.times(g.Aabb.p).over(_2))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).over(_2))			.plus(g.AABB.p.times(g.aabb.p).over(_1))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).over(_4))			.plus(g.AABb.p.times(g.AaBb.p).over(_4))			.plus(g.AABb.p.times(g.Aabb.p).over(_4))			.plus(g.AABb.p.times(g.aaBB.p).over(_2))			.plus(g.AABb.p.times(g.aaBb.p).over(_2))			.plus(g.AABb.p.times(g.aabb.p).over(_2))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).over(_2))			.plus(g.AAbb.p.times(g.AaBb.p).over(_4))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).over(_1))			.plus(g.AAbb.p.times(g.aaBb.p).over(_2))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).over(_4))			.plus(g.AaBB.p.times(g.Aabb.p).over(_2))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).over(_4))			.plus(g.AaBB.p.times(g.aabb.p).over(_2))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_4))	.plus(g.AaBb.p.times(g.Aabb.p).over(_4))			.plus(g.AaBb.p.times(g.aaBB.p).over(_4))			.plus(g.AaBb.p.times(g.aaBb.p).over(_4))			.plus(g.AaBb.p.times(g.aabb.p).over(_4))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).over(_2))			.plus(g.Aabb.p.times(g.aaBb.p).over(_4))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.AaBb.s).over(percentage_scaling);
-			g_.Aabb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).times(_0))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).times(_0))			.plus(g.AABb.p.times(g.AaBb.p).over(_4))			.plus(g.AABb.p.times(g.Aabb.p).over(_4))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).over(_2))			.plus(g.AABb.p.times(g.aabb.p).over(_2))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).over(_4))			.plus(g.AAbb.p.times(g.Aabb.p).over(_2))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).over(_2))			.plus(g.AAbb.p.times(g.aabb.p).over(_1))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).times(_0))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).times(_0))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_8))	.plus(g.AaBb.p.times(g.Aabb.p).over(_4))			.plus(g.AaBb.p.times(g.aaBB.p).times(_0))			.plus(g.AaBb.p.times(g.aaBb.p).over(_8))			.plus(g.AaBb.p.times(g.aabb.p).over(_4))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).over(_2))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).over(_4))			.plus(g.Aabb.p.times(g.aabb.p).over(_2))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).times(_0))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.Aabb.s).over(percentage_scaling);
-			g_.aaBB.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).times(_0))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).times(_0))			.plus(g.AABb.p.times(g.AaBb.p).times(_0))			.plus(g.AABb.p.times(g.Aabb.p).times(_0))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).times(_0))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).over(_4))	.plus(g.AaBB.p.times(g.AaBb.p).over(_8))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).over(_2))			.plus(g.AaBB.p.times(g.aaBb.p).over(_4))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_16))	.plus(g.AaBb.p.times(g.Aabb.p).times(_0))			.plus(g.AaBb.p.times(g.aaBB.p).over(_4))			.plus(g.AaBb.p.times(g.aaBb.p).over(_8))			.plus(g.AaBb.p.times(g.aabb.p).times(_0))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).times(_0))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).over(_1))	.plus(g.aaBB.p.times(g.aaBb.p).over(_2))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).over(_4))	.plus(g.aaBb.p.times(g.aabb.p).times(_0))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.aaBB.s).over(percentage_scaling);
-			g_.aaBb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).times(_0))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).times(_0))			.plus(g.AABb.p.times(g.AaBb.p).times(_0))			.plus(g.AABb.p.times(g.Aabb.p).times(_0))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).times(_0))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).over(_8))			.plus(g.AaBB.p.times(g.Aabb.p).over(_4))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).over(_4))			.plus(g.AaBB.p.times(g.aabb.p).over(_2))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_8))	.plus(g.AaBb.p.times(g.Aabb.p).over(_8))			.plus(g.AaBb.p.times(g.aaBB.p).over(_4))			.plus(g.AaBb.p.times(g.aaBb.p).over(_4))			.plus(g.AaBb.p.times(g.aabb.p).over(_4))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).times(_0))	.plus(g.Aabb.p.times(g.aaBB.p).over(_2))			.plus(g.Aabb.p.times(g.aaBb.p).over(_4))			.plus(g.Aabb.p.times(g.aabb.p).times(_0))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).over(_2))			.plus(g.aaBB.p.times(g.aabb.p).over(_1))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).over(_2))	.plus(g.aaBb.p.times(g.aabb.p).over(_2))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).times(_0))
-			).times(g.aaBb.s).over(percentage_scaling);
-			g_.aabb.p = offspring_ave.times(
-				g.AABB.p.times(g.AABB.p.minus(sc)).times(_0).plus(g.AABB.p.times(g.AABb.p).times(_0))			.plus(g.AABB.p.times(g.AAbb.p).times(_0))			.plus(g.AABB.p.times(g.AaBB.p).times(_0))			.plus(g.AABB.p.times(g.AaBb.p).times(_0))			.plus(g.AABB.p.times(g.Aabb.p).times(_0))			.plus(g.AABB.p.times(g.aaBB.p).times(_0))			.plus(g.AABB.p.times(g.aaBb.p).times(_0))			.plus(g.AABB.p.times(g.aabb.p).times(_0))
-															.plus(g.AABb.p.times(g.AABb.p.minus(sc)).times(_0))	.plus(g.AABb.p.times(g.AAbb.p).times(_0))			.plus(g.AABb.p.times(g.AaBB.p).times(_0))			.plus(g.AABb.p.times(g.AaBb.p).times(_0))			.plus(g.AABb.p.times(g.Aabb.p).times(_0))			.plus(g.AABb.p.times(g.aaBB.p).times(_0))			.plus(g.AABb.p.times(g.aaBb.p).times(_0))			.plus(g.AABb.p.times(g.aabb.p).times(_0))
-																												.plus(g.AAbb.p.times(g.AAbb.p.minus(sc)).times(_0))	.plus(g.AAbb.p.times(g.AaBB.p).times(_0))			.plus(g.AAbb.p.times(g.AaBb.p).times(_0))			.plus(g.AAbb.p.times(g.Aabb.p).times(_0))			.plus(g.AAbb.p.times(g.aaBB.p).times(_0))			.plus(g.AAbb.p.times(g.aaBb.p).times(_0))			.plus(g.AAbb.p.times(g.aabb.p).times(_0))
-																																									.plus(g.AaBB.p.times(g.AaBB.p.minus(sc)).times(_0))	.plus(g.AaBB.p.times(g.AaBb.p).times(_0))			.plus(g.AaBB.p.times(g.Aabb.p).times(_0))			.plus(g.AaBB.p.times(g.aaBB.p).times(_0))			.plus(g.AaBB.p.times(g.aaBb.p).times(_0))			.plus(g.AaBB.p.times(g.aabb.p).times(_0))
-																																																						.plus(g.AaBb.p.times(g.AaBb.p.minus(sc)).over(_16))	.plus(g.AaBb.p.times(g.Aabb.p).over(_8))			.plus(g.AaBb.p.times(g.aaBB.p).times(_0))			.plus(g.AaBb.p.times(g.aaBb.p).over(_8))			.plus(g.AaBb.p.times(g.aabb.p).over(_4))
-																																																																			.plus(g.Aabb.p.times(g.Aabb.p.minus(sc)).over(_4))	.plus(g.Aabb.p.times(g.aaBB.p).times(_0))			.plus(g.Aabb.p.times(g.aaBb.p).over(_4))			.plus(g.Aabb.p.times(g.aabb.p).over(_2))
-																																																																																.plus(g.aaBB.p.times(g.aaBB.p.minus(sc)).times(_0))	.plus(g.aaBB.p.times(g.aaBb.p).times(_0))			.plus(g.aaBB.p.times(g.aabb.p).times(_0))
-																																																																																													.plus(g.aaBb.p.times(g.aaBb.p.minus(sc)).over(_4))	.plus(g.aaBb.p.times(g.aabb.p).over(_2))
-																																																																																																										.plus(g.aabb.p.times(g.aabb.p.minus(sc)).over(_1))
-			).times(g.aabb.s).over(percentage_scaling);
-
+			// initializing g_
+			genotypes.forEach((genotype) => {
+				g_[genotype] = {p: bigInt('0'), s: g[genotype].s};
+			});
+			// generating crossings array
+			for (var i = 0; i < genotypes.length; i++) {
+				var parent_1 = genotypes[i];
+				crossings.push(g[parent_1].p.times(g[parent_1].p.minus(sc)));
+				for (var j = i + 1; j < genotypes.length; j++) {
+					var parent_2 = genotypes[j];
+					crossings.push(g[parent_1].p.times(g[parent_2].p));
+				};
+			};
+			// free-cross
+			genotypes.forEach((genotype) => {
+				var pairs = bigInt('0'),
+					counter = 0;
+				for (var i = 0; i < genotypes.length; i++) {
+					var parent_1 = genotypes[i];
+					for (var j = i; j < genotypes.length; j++) {
+						var parent_2 = genotypes[j];
+						pairs = pairs.plus(cross(parent_1, parent_2, genotype, crossings[counter]));
+						counter++;
+					};
+				};
+				g_[genotype].p = offspring_ave.times(pairs).times(g_[genotype].s).over(percentage_scaling)
+			});
 			g_ = population_ctrl(g_);
-			return free_cross(n + 1, g_);
+			return free_crossing(n + 1, g_);
 		};
 	}
 
-	function update_input(){
+	function update_input(event){
 		var sum;
-		generation_count = parseInt(document.getElementById("generation-count").value);
-		offspring_ave = bigInt(document.getElementById("offspring-average").value);
-		if (document.getElementById("self-crossing").checked) sc = bigInt('0');
-			else sc = bigInt('1');
-		generation = {
-			AABB: {p: bigInt(document.getElementById("AABB-initial-population").value), s: bigInt(parseFloat(document.getElementById("AABB-survivability").value) * percentage_scaling)},
-			AABb: {p: bigInt(document.getElementById("AABb-initial-population").value), s: bigInt(parseFloat(document.getElementById("AABb-survivability").value) * percentage_scaling)},
-			AAbb: {p: bigInt(document.getElementById("AAbb-initial-population").value), s: bigInt(parseFloat(document.getElementById("AAbb-survivability").value) * percentage_scaling)},
-			AaBB: {p: bigInt(document.getElementById("AaBB-initial-population").value), s: bigInt(parseFloat(document.getElementById("AaBB-survivability").value) * percentage_scaling)},
-			AaBb: {p: bigInt(document.getElementById("AaBb-initial-population").value), s: bigInt(parseFloat(document.getElementById("AaBb-survivability").value) * percentage_scaling)},
-			Aabb: {p: bigInt(document.getElementById("Aabb-initial-population").value), s: bigInt(parseFloat(document.getElementById("Aabb-survivability").value) * percentage_scaling)},
-			aaBB: {p: bigInt(document.getElementById("aaBB-initial-population").value), s: bigInt(parseFloat(document.getElementById("aaBB-survivability").value) * percentage_scaling)},
-			aaBb: {p: bigInt(document.getElementById("aaBb-initial-population").value), s: bigInt(parseFloat(document.getElementById("aaBb-survivability").value) * percentage_scaling)},
-			aabb: {p: bigInt(document.getElementById("aabb-initial-population").value), s: bigInt(parseFloat(document.getElementById("aabb-survivability").value) * percentage_scaling)},
-		};
-		sum = population_sum(generation);
+		
+		survival_correlation = document.getElementById("survival_correlate").checked;
+		population_correlation = document.getElementById("population_correlate").checked;
+		if (event && event.target) {
+			if (event.target.classList.contains("survival_rate") && survival_correlation) {
+				Array.prototype.forEach.call(document.getElementsByClassName(event.target.classList[3] + " survival_rate"), function(element){
+					element.value = event.target.value;
+				});
+			};
 
-		pie_chart.data.datasets[0].data = [
-			percentage(generation.AABB.p, sum),
-			percentage(generation.AABb.p, sum),
-			percentage(generation.AAbb.p, sum),
-			percentage(generation.AaBB.p, sum),
-			percentage(generation.AaBb.p, sum),
-			percentage(generation.Aabb.p, sum),
-			percentage(generation.aaBB.p, sum),
-			percentage(generation.aaBb.p, sum),
-			percentage(generation.aabb.p, sum),
-		];
+			if (event.target.classList.contains("population") && population_correlation) {
+				Array.prototype.forEach.call(document.getElementsByClassName("population"), function(element){
+					element.value = event.target.value;
+				});
+			};
+		};
+
+		generation_count = parseInt(document.getElementById("g_count").value);
+		offspring_ave = bigInt(document.getElementById("offspring_ave").value);
+		if (document.getElementById("self_crossing").checked) {
+			sc = bigInt('0');
+		} else {
+			sc = bigInt('1');
+		};
+		generation = {};
+		genotypes.forEach((genotype) => {
+			generation[genotype] = {
+				p: bigInt(parseInt(document.getElementById(prefixes.init_pop + genotype).value)),
+				s: bigInt(parseFloat(document.getElementById(prefixes.srvl_rate + genotype).value) * percentage_scaling),
+			};
+		});
+
+		sum = population_sum(generation);
+		pie_chart.data.datasets[0].data = [];
+		genotypes.forEach((genotype) => {
+			pie_chart.data.datasets[0].data.push(percentage(generation[genotype].p, sum));
+		});
 		pie_chart.update();
 	}
 
 	function simulate(g){
+		var new_parameter_string = "";
 		document.body.classList.add("loading");
 		Array.prototype.forEach.call(document.getElementsByTagName("input"), function(element){
 			element.setAttribute("disabled", "");
@@ -347,20 +333,66 @@ window.onload = function(){
 			dataset.data = [];
 		});
 
-		console.log(JSON.stringify(free_cross(0, g)));
+		console.log(JSON.stringify(free_crossing(0, g)));
 
 		area_chart.update();
+
+		document.getElementById("has_run").value = "1";
 
 		document.body.classList.remove("loading");
 		Array.prototype.forEach.call(document.getElementsByTagName("input"), function(element){
 			element.removeAttribute("disabled");
+			if (element.type !== "submit") {
+				if (element.type === "number" || element.type === "hidden") {
+					debugger;
+					new_parameter_string += "&" + encodeURIComponent(element.id) + "=" + encodeURIComponent(element.value);
+				} else if (element.type === "checkbox") {
+					new_parameter_string += "&" + encodeURIComponent(element.id) + "=" + encodeURIComponent(element.checked);
+				};
+			};
 		});
+		window.history.replaceState(generation, '', 'index.html?' + new_parameter_string.substring(1));
 	}
+
+	// window.onpopstate = function(event){
+	// 	if (event.state) {
+	// 		generation = event.state;
+	// 		simulate();
+	// 	};
+	// };
+
+	for (var i = 0; i < genotypes.length; i++) {
+		area_chart.data.datasets.push({
+			backgroundColor: transparentize(colors[i]),
+			borderColor: colors[i],
+			data: [],
+			label: genotypes[i],
+			fill: '-1',
+		});
+	};
+	area_chart.data.datasets[0].fill = 'origin';
+
+	(function update_query_variables(query){
+		var vars = query.split("&");
+		vars.forEach((var_string) => {
+			var parts = var_string.split("="),
+				name = decodeURIComponent(parts[0]),
+				value = decodeURIComponent(parts[1]),
+				input_element = document.getElementById(name);
+			if (input_element) {
+				if ((input_element.type === "number" || input_element.type === "hidden")  && !Number.isNaN(parseInt(value))) {
+					input_element.value = value;
+				} else if (input_element.type === "checkbox") {
+					input_element.checked = (value === "true")?true:false;
+				};
+			};
+		});
+	})(window.location.search.substring(1));
 
 	update_input();
 
 	Array.prototype.forEach.call(document.getElementsByTagName("input"), function(element){
-		element.oninput = update_input;
+		element.addEventListener('input', update_input);
 	});
 
 	document.getElementById("form").onsubmit = function(){
@@ -383,6 +415,5 @@ window.onload = function(){
 		};
 	};
 
-	// simulate(generation);
+	if (document.getElementById("has_run").value == "1") simulate(generation);
 };
-})();

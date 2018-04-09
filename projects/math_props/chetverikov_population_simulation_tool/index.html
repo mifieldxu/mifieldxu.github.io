@@ -6,31 +6,213 @@
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-	<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
 </head>
 <body>
 	<div id="wrapper">
 		<form id="form">
-			<label># of generations to simulate: <input type="number" class="generation-count" id="generation-count" required title="# of generations to simulate" placeholder="# of generations to simulate" value="150" min="1" max="1500" step="1"></label>
-			<label>average # of offspring for each pair: <input type="number" class="offspring-average" id="offspring-average" required title="average # of offspring for each pair" placeholder="average # of offspring for each pair" value="1" min="1" max="100" step="1"></label>
-			<label>allow self-crossing: <input type="checkbox" class="self-crossing" id="self-crossing" title="allow self-crossing" checked></label>
-
-			<br>
-
-			<label>AABB initial population: <input type="number" class="population" id="AABB-initial-population" required title="AABB initial population" placeholder="AABB initial population" value="000" min="0" max="10000" step="10"></label> <label>AABB survivability percentage: <input type="number" class="survivability" id="AABB-survivability" required title="AABB survivability percentage" placeholder="AABB survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
-			<label>AABb initial population: <input type="number" class="population" id="AABb-initial-population" required title="AABb initial population" placeholder="AABb initial population" value="2000" min="0" max="10000" step="10"></label> <label>AABb survivability percentage: <input type="number" class="survivability" id="AABb-survivability" required title="AABb survivability percentage" placeholder="AABb survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
-			<label>AAbb initial population: <input type="number" class="population" id="AAbb-initial-population" required title="AAbb initial population" placeholder="AAbb initial population" value="1000" min="0" max="10000" step="10"></label> <label>AAbb survivability percentage: <input type="number" class="survivability" id="AAbb-survivability" required title="AAbb survivability percentage" placeholder="AAbb survivability percentage" value="98" min="0" max="100" step="0.1">%</label> <br>
-			<label>AaBB initial population: <input type="number" class="population" id="AaBB-initial-population" required title="AaBB initial population" placeholder="AaBB initial population" value="2000" min="0" max="10000" step="10"></label> <label>AaBB survivability percentage: <input type="number" class="survivability" id="AaBB-survivability" required title="AaBB survivability percentage" placeholder="AaBB survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
-			<label>AaBb initial population: <input type="number" class="population" id="AaBb-initial-population" required title="AaBb initial population" placeholder="AaBb initial population" value="3000" min="0" max="10000" step="10"></label> <label>AaBb survivability percentage: <input type="number" class="survivability" id="AaBb-survivability" required title="AaBb survivability percentage" placeholder="AaBb survivability percentage" value="96" min="0" max="100" step="0.1">%</label> <br>
-			<label>Aabb initial population: <input type="number" class="population" id="Aabb-initial-population" required title="Aabb initial population" placeholder="Aabb initial population" value="1000" min="0" max="10000" step="10"></label> <label>Aabb survivability percentage: <input type="number" class="survivability" id="Aabb-survivability" required title="Aabb survivability percentage" placeholder="Aabb survivability percentage" value="98" min="0" max="100" step="0.1">%</label> <br>
-			<label>aaBB initial population: <input type="number" class="population" id="aaBB-initial-population" required title="aaBB initial population" placeholder="aaBB initial population" value="1000" min="0" max="10000" step="10"></label> <label>aaBB survivability percentage: <input type="number" class="survivability" id="aaBB-survivability" required title="aaBB survivability percentage" placeholder="aaBB survivability percentage" value="94" min="0" max="100" step="0.1">%</label> <br>
-			<label>aaBb initial population: <input type="number" class="population" id="aaBb-initial-population" required title="aaBb initial population" placeholder="aaBb initial population" value="1000" min="0" max="10000" step="10"></label> <label>aaBb survivability percentage: <input type="number" class="survivability" id="aaBb-survivability" required title="aaBb survivability percentage" placeholder="aaBb survivability percentage" value="94" min="0" max="100" step="0.1">%</label> <br>
-			<label>aabb initial population: <input type="number" class="population" id="aabb-initial-population" required title="aabb initial population" placeholder="aabb initial population" value="500" min="0" max="10000" step="10"></label> <label>aabb survivability percentage: <input type="number" class="survivability" id="aabb-survivability" required title="aabb survivability percentage" placeholder="aabb survivability percentage" value="100" min="0" max="100" step="0.1">%</label> <br>
-
-			<input type="submit" class="submit" id="submit" title="run the thing" value="run">
+			<div class="cell row_label column_label">
+				<div class="content">
+				
+				</div>
+			</div>
+			<div class="cell column_label BB" id="label_BB">
+				<div class="content">
+				BB
+				</div>
+			</div>
+			<div class="cell column_label Bb" id="label_Bb">
+				<div class="content">
+				Bb
+				</div>
+			</div>
+			<div class="cell column_label bb" id="label_bb">
+				<div class="content">
+				bb
+				</div>
+			</div>
+			<div class="cell row_label" id="label_AA">
+				<div class="content">
+				AA
+				</div>
+			</div>
+			<div class="cell input" id="cell_AABB">
+				<div class="content">
+					<div class="cell_label">
+						AABB
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population AA BB AB" id="p_AABB" required title="AABB initial population" placeholder="AABB initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate AA BB AB" id="s_AABB" required title="AABB survival rate" placeholder="AABB survival rate" value="99.8" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_AABb">
+				<div class="content">
+					<div class="cell_label">
+						AABb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population AA Bb AB" id="p_AABb" required title="AABb initial population" placeholder="AABb initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate AA Bb AB" id="s_AABb" required title="AABb survival rate" placeholder="AABb survival rate" value="99.8" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_AAbb">
+				<div class="content">
+					<div class="cell_label">
+						AAbb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population AA bb Ab" id="p_AAbb" required title="AAbb initial population" placeholder="AAbb initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate AA bb Ab" id="s_AAbb" required title="AAbb survival rate" placeholder="AAbb survival rate" value="99.7" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell row_label" id="label_Aa">
+				<div class="content">
+					Aa
+				</div>
+			</div>
+			<div class="cell input" id="cell_AaBB">
+				<div class="content">
+					<div class="cell_label">
+						AaBB
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population Aa BB AB" id="p_AaBB" required title="AaBB initial population" placeholder="AaBB initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate Aa BB AB" id="s_AaBB" required title="AaBB survival rate" placeholder="AaBB survival rate" value="99.8" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_AaBb">
+				<div class="content">
+					<div class="cell_label">
+						AaBb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population Aa Bb AB" id="p_AaBb" required title="AaBb initial population" placeholder="AaBb initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate Aa Bb AB" id="s_AaBb" required title="AaBb survival rate" placeholder="AaBb survival rate" value="99.8" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_Aabb">
+				<div class="content">
+					<div class="cell_label">
+						Aabb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population Aa bb Ab" id="p_Aabb" required title="Aabb initial population" placeholder="Aabb initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate Aa bb Ab" id="s_Aabb" required title="Aabb survival rate" placeholder="Aabb survival rate" value="99.7" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell row_label" id="label_aa">
+				<div class="content">
+					aa
+				</div>
+			</div>
+			<div class="cell input" id="cell_aaBB">
+				<div class="content">
+					<div class="cell_label">
+						aaBB
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population aa BB aB" id="p_aaBB" required title="aaBB initial population" placeholder="aaBB initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate aa BB aB" id="s_aaBB" required title="aaBB survival rate" placeholder="aaBB survival rate" value="99.7" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_aaBb">
+				<div class="content">
+					<div class="cell_label">
+						aaBb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population aa Bb aB" id="p_aaBb" required title="aaBb initial population" placeholder="aaBb initial population" value="10000" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate aa Bb aB" id="s_aaBb" required title="aaBb survival rate" placeholder="aaBb survival rate" value="99.7" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="cell input" id="cell_aabb">
+				<div class="content">
+					<div class="cell_label">
+						aabb
+					</div>
+					<label class="population">
+						p: 
+						<input type="number" class="population aa bb ab" id="p_aabb" required title="aabb initial population" placeholder="aabb initial population" value="10284" min="0" max="1000000" step="1">
+					</label>
+					<label class="survival_rate">
+						s: 
+						<input type="number" class="survival_rate aa bb ab" id="s_aabb" required title="aabb survival rate" placeholder="aabb survival rate" value="99.9" min="0" max="100" step="0.01">%
+					</label>
+				</div>
+			</div>
+			<div class="settings" id="settings">
+				<label id="g_count_label">
+					# of generations to simulate: 
+					<input type="number" class="g_count" id="g_count" required title="# of generations to simulate" placeholder="# of generations to simulate" value="300" min="1" max="1500" step="1">
+				</label>
+				<input type="submit" class="submit" id="submit" title="run the thing" value="run">
+				<label id="offspring_ave_label">
+					average # of offspring for each pair: 
+					<input type="number" class="offspring_ave" id="offspring_ave" required title="average # of offspring for each pair" placeholder="average # of offspring for each pair" value="1" min="1" max="100" step="1">
+				</label>
+				<div id="checkboxes">
+					<label>
+						<input type="checkbox" class="self_crossing" id="self_crossing" title="allow self-crossing" checked>
+						allow self-crossing: 
+					</label>
+					<label>
+						<input type="checkbox" class="survival_correlate" id="survival_correlate" title="correlate the survival rates of the genotypes that display the same phenotypes" checked>
+						correlate the survival rates of the genotypes that display the same phenotypes: 
+					</label>
+					<label>
+						<input type="checkbox" class="population_correlate" id="population_correlate" title="equalize the initial populations of all genotypes">
+						equalize the initial populations of all genotypes: 
+					</label>
+				</div>
+				<input type="hidden" id="has_run" value="0">
+			</div>
 		</form>
-		<canvas id="pie-chart"></canvas>
-		<canvas id="area-chart"></canvas>
+		<div id="pie_chart_container">
+			<canvas id="pie_chart_canvas"></canvas>
+		</div>
+		<div id="area_chart_container">
+			<canvas id="area_chart_canvas"></canvas>
+		</div>
 	</div>
 	<script type="text/javascript" src="script.js" charset="utf-8"></script>
 </body>

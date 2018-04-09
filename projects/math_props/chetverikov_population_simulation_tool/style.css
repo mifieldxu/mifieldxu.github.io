@@ -1,18 +1,131 @@
 body{
-	margin: 0;
+	margin: 10px 0 0 0;
+	font-family: Georgia;
 }
 .loading{
 	cursor: wait !important;
 }
 #wrapper{
-	width: 800px;
+	width: 1000px;
 	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 70% 30%;
+	grid-template-rows: 380px 400px;
+	grid-template-areas: 
+		"controls pie_chart"
+		"area_chart area_chart";
 }
 
-#pie-chart{
-	position: relative;
-}
-
-.survivability{
+.survival_rate{
 	text-align: right;
+}
+#form{
+	grid-area: controls;
+	display: grid;
+	grid-template-columns: 30px 33.33fr 33.33fr 33.33fr;
+	grid-template-rows: 27px 19fr 19fr 19fr 23fr;
+}
+.cell{
+	justify-self: center;
+	align-self: center;
+	border-radius: 4px;
+	color: #ffffff;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+.cell.column_label > .content{
+	margin: 2px 90px;
+}
+.cell.row_label > .content{
+	margin: 20px 2px;
+}
+.cell.input > .content{
+	margin: 10px 10px;
+	display: grid;
+	grid-template-columns: 40px 130px;
+	grid-template-rows: 50% 50%;
+	grid-template-areas: 
+		"cell_label p"
+		". s";
+}
+.cell_label{
+	grid-area: cell_label;
+}
+.cell.input label{
+	justify-self: right;
+}
+label.population{
+	grid-area: p;
+}
+label.survival_rate{
+	grid-area: s;
+}
+#pie_chart_container{
+	grid-area: pie_chart;
+}
+#area_chart_container{
+	grid-area: area_chart;
+}
+#settings{
+	grid-column-start: 1;
+	grid-column-end: span 4;
+	display: grid;
+	grid-template-columns: 100fr 40px;
+	grid-template-rows: 24px 100fr;
+	grid-template-areas: 
+		"generations submit"
+		/*"offspring offspring"*/
+		"checkboxes checkboxes"; 
+}
+#settings label{
+	display: block;
+}
+#g_count_label{
+	grid-area: generations;
+}
+#submit{
+	grid-area: submit;
+}
+#offspring_ave_label{
+	display: none !important;
+	grid-area: offspring;
+}
+#checkboxes{
+	grid-area: checkboxes;
+}
+
+#cell_AABB
+{
+	background-color: #800080
+}
+#cell_AABb
+{
+	background-color: #ae105e
+}
+#cell_AAbb, #label_AA
+{
+	background-color: #dc143c
+}
+#cell_AaBB
+{
+	background-color: #6135b1
+}
+#cell_AaBb
+{
+	background-color: #aa4aaa
+}
+#cell_Aabb, #label_Aa
+{
+	background-color: #d87488
+}
+#cell_aaBB, #label_BB
+{
+	background-color: #4169e1
+}
+#cell_aaBb, #label_Bb
+{
+	background-color: #8a96ea
+}
+#cell_aabb, #label_aa, #label_bb
+{
+	background-color: #d3d3d3
 }
