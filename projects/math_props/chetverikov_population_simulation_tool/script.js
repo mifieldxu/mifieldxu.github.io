@@ -9,20 +9,14 @@ window.onload = function(){
 		generation_count,
 		offspring_ave,
 		sc, //self crossing
-		survival_correlation,
 		population_correlation,
+		survival_correlation,
 		generation,
 		popln_ctrl = true,
 		popln_ctrl_limit = bigInt('1000000000000000000000'),
 		percentage_decimal = 6,
 		percentage_scaling = bigInt(Math.pow(10, 2 + percentage_decimal)),
-		genotypes = ['AABB', 'AABb', 'AAbb', 'AaBB', 'AaBb', 'Aabb', 'aaBB', 'aaBb', 'aabb'],
-		colors = ['#800080', '#ae105e', '#dc143c', '#6135b1', '#aa4aaa', '#d87488', '#4169e1', '#8a96ea', '#d3d3d3'],
-		prefixes = {
-			init_pop: "p_",
-			srvl_rate: "s_",
-		},
-		results = {
+		fractions = {
 			AA: {
 				AA: {
 					AA: _1,
@@ -125,7 +119,15 @@ window.onload = function(){
 					bb: _1,
 				},
 			},
-		};
+		},
+		genotypes = ['AABB', 'AABb', 'AAbb', 'AaBB', 'AaBb', 'Aabb', 'aaBB', 'aaBb', 'aabb'],
+		colors = ['#800080', '#ae105e', '#dc143c', '#6135b1', '#aa4aaa', '#d87488', '#4169e1', '#8a96ea', '#d3d3d3'],
+		prefixes = {
+			init_pop: "p_",
+			srvl_rate: "s_",
+		},
+		in_focus_class_name = "in_focus",
+		pos_pheno_class_name = 3;
 
 	var area_chart_element = document.getElementById("area_chart_canvas").getContext('2d'),
 		pie_chart_element = document.getElementById("pie_chart_canvas").getContext('2d');
@@ -215,7 +217,8 @@ window.onload = function(){
 		return g;
 	}
 
-	function cross(parent_1, parent_2, result, number_of_crossings){
+//equivalent to cross()
+	function cross_without_logging(parent_1, parent_2, result, number_of_crossings){
 		var p_1 = {
 				a: parent_1.substring(0, 2),
 				b: parent_1.substring(2),
@@ -233,6 +236,40 @@ window.onload = function(){
 		} else {
 			return _0;
 		};
+	}
+
+	function cross(parent_1, parent_2, result, number_of_crossings){
+		var combined_fraction;
+		if (fractions.hasOwnProperty(parent_1) && fractions[parent_1].hasOwnProperty(parent_2) && fractions[parent_1][parent_2].hasOwnProperty(result)) {
+			combined_fraction = fractions[parent_1][parent_2][result];
+		} else {
+			var p_1 = {
+					a: parent_1.substring(0, 2),
+					b: parent_1.substring(2),
+				},
+				p_2 = {
+					a: parent_2.substring(0, 2),
+					b: parent_2.substring(2),
+				},
+				r = {
+					a: result.substring(0, 2),
+					b: result.substring(2),
+				};
+			if (fractions[p_1.a][p_2.a][r.a] === 0 || fractions[p_1.b][p_2.b][r.b] === 0) {
+				combined_fraction = 0;
+			} else {
+				combined_fraction = fractions[p_1.a][p_2.a][r.a].times(fractions[p_1.b][p_2.b][r.b]);
+			};
+
+			if (!fractions.hasOwnProperty(parent_1)) {
+				fractions[parent_1] = {};
+			};
+			if (!fractions[parent_1].hasOwnProperty(parent_2)) {
+				fractions[parent_1][parent_2] = {};
+			};
+			fractions[parent_1][parent_2][result] = combined_fraction;
+		};
+		return combined_fraction?number_of_crossings.over(combined_fraction):_0;
 	}
 
 	function free_crossing(n, g){
@@ -286,7 +323,7 @@ window.onload = function(){
 		population_correlation = document.getElementById("population_correlate").checked;
 		if (event && event.target) {
 			if (event.target.classList.contains("survival_rate") && survival_correlation) {
-				Array.prototype.forEach.call(document.getElementsByClassName(event.target.classList[3] + " survival_rate"), function(element){
+				Array.prototype.forEach.call(document.getElementsByClassName(event.target.classList[pos_pheno_class_name] + " survival_rate"), function(element){
 					element.value = event.target.value;
 				});
 			};
@@ -321,6 +358,35 @@ window.onload = function(){
 		pie_chart.update();
 	}
 
+	function focus(action, event){
+		if (action === 'add') {
+			update_input();
+		};
+		if (event && event.target) {
+			if (population_correlation && event.target.classList.contains('population')) {
+				Array.prototype.forEach.call(document.querySelectorAll('.cell input.population'), function(element){
+					if (element.id != event.target.id) {
+						element.classList[action](in_focus_class_name);
+					};
+				});
+			} else if (survival_correlation && event.target.classList.contains('survival_rate')) {
+				Array.prototype.forEach.call(document.querySelectorAll('.cell input.survival_rate'), function(element){
+					if (element.classList[pos_pheno_class_name] === event.target.classList[pos_pheno_class_name] && element.id !== event.target.id) {
+						element.classList[action](in_focus_class_name);
+					};
+				});
+			};
+		};
+	}
+
+	function add_focus(event){
+		focus('add', event);
+	}
+
+	function remove_focus(event){
+		focus('remove', event);
+	}
+
 	function simulate(g){
 		var new_parameter_string = "";
 		document.body.classList.add("loading");
@@ -332,8 +398,8 @@ window.onload = function(){
 		area_chart.data.datasets.forEach((dataset) => {
 			dataset.data = [];
 		});
-
-		console.log(JSON.stringify(free_crossing(0, g)));
+// where the magic happens
+		free_crossing(0, g);
 
 		area_chart.update();
 
@@ -344,7 +410,6 @@ window.onload = function(){
 			element.removeAttribute("disabled");
 			if (element.type !== "submit") {
 				if (element.type === "number" || element.type === "hidden") {
-					debugger;
 					new_parameter_string += "&" + encodeURIComponent(element.id) + "=" + encodeURIComponent(element.value);
 				} else if (element.type === "checkbox") {
 					new_parameter_string += "&" + encodeURIComponent(element.id) + "=" + encodeURIComponent(element.checked);
@@ -393,6 +458,11 @@ window.onload = function(){
 
 	Array.prototype.forEach.call(document.getElementsByTagName("input"), function(element){
 		element.addEventListener('input', update_input);
+	});
+
+	Array.prototype.forEach.call(document.querySelectorAll('.cell input'), function(element){
+		element.addEventListener('focus', add_focus);
+		element.addEventListener('focusout', remove_focus);
 	});
 
 	document.getElementById("form").onsubmit = function(){

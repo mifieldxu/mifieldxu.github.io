@@ -1,5 +1,5 @@
 body{
-	margin: 10px 0 0 0;
+	margin: 1vmin 0 0 0;
 	font-family: Georgia;
 }
 .loading{
@@ -10,20 +10,19 @@ body{
 	margin: 0 auto;
 	display: grid;
 	grid-template-columns: 70% 30%;
-	grid-template-rows: 380px 400px;
+	grid-template-rows: 40vmin 59vmin;
 	grid-template-areas: 
 		"controls pie_chart"
 		"area_chart area_chart";
 }
 
-.survival_rate{
-	text-align: right;
-}
 #form{
 	grid-area: controls;
+	min-height: 295px;
 	display: grid;
 	grid-template-columns: 30px 33.33fr 33.33fr 33.33fr;
-	grid-template-rows: 27px 19fr 19fr 19fr 23fr;
+	grid-template-rows: 27px 33.33fr 33.33fr 33.33fr 84px;
+	z-index: 1;
 }
 .cell{
 	justify-self: center;
@@ -128,4 +127,12 @@ label.survival_rate{
 #cell_aabb, #label_aa, #label_bb
 {
 	background-color: #d3d3d3
+}
+
+
+.survival_rate{
+	text-align: right;
+}
+.cell input:focus, input.in_focus{
+	outline: double black;
 }
